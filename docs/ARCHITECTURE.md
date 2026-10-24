@@ -6,18 +6,112 @@ Assistant IA vocal local pour Android.
 
 ---
 
-# Objectif de l'architecture
+# Vision
 
-Créer un système modulaire où :
+Kiro est un assistant vocal personnel fonctionnant entièrement localement sur Android.
 
-- chaque composant a une responsabilité unique
-- le LLM est isolé du système Android
-- les actions passent obligatoirement par un routeur MCP
-- les nouveaux outils peuvent être ajoutés facilement
+Principes fondamentaux :
+
+- 100 % Kotlin
+- 100 % local
+- Offline First
+- Privacy First
+- Aucune donnée utilisateur envoyée vers un serveur externe
+- Le LLM ne possède aucun pouvoir direct
+- Toutes les actions passent par MCP
 
 ---
 
-# Vue d'ensemble
+# Objectifs
+
+Créer un assistant capable de :
+
+```text
+"Kiro, chanson suivante."
+"Kiro, qui vient de m'écrire ?"
+"Kiro, ouvre Spotify."
+"Kiro, quelle heure est-il ?"
+```
+
+tout en gardant un contrôle total sur :
+
+- les permissions
+- les actions disponibles
+- les données utilisateur
+
+---
+
+# Principes de conception
+
+## Aucune autonomie
+
+Kiro n'agit jamais seul.
+
+Kiro ne possède pas :
+
+- routines automatiques
+- automatisations
+- déclencheurs
+- suggestions spontanées
+
+Toutes les interactions commencent par :
+
+```text
+Utilisateur
+↓
+"Kiro"
+↓
+Commande
+```
+
+---
+
+## Local uniquement
+
+Tous les traitements doivent être effectués sur le téléphone.
+
+```text
+Microphone
+STT
+LLM
+Mémoire
+Historique
+Notifications
+```
+
+restent sur l'appareil.
+
+Aucune transcription ou conversation ne doit être envoyée vers un serveur distant.
+
+---
+
+## Contrôle absolu
+
+Le LLM ne décide jamais de ce qu'il peut faire.
+
+Le développeur définit les capacités autorisées.
+
+Exemple :
+
+```text
+"Kiro, supprime mes photos."
+```
+
+↓
+
+```text
+Action inexistante
+```
+
+↓
+
+```text
+Je ne possède pas cette capacité.
+```
+
+---
+
+# Architecture globale
 
 ```text
 Utilisateur
@@ -34,39 +128,35 @@ Utilisateur
       ▼
   MCP Router
       │
- ┌────┼────────────┬────────────┐
- ▼    ▼            ▼            ▼
-Spotify Notifications Applications System
+ ┌────┼───────────────┐
+ ▼    ▼               ▼
+Tools Permissions  Logging
 ```
 
 ---
 
-# Couche UI
-
-Responsabilité :
-
-- affichage
-- dashboard
-- historique
-- paramètres
-
-La couche UI ne doit jamais exécuter directement une action système.
-
----
-
-# Couche Voice
-
-Responsabilité :
-
-- gestion microphone
-- écoute vocale
-- envoi au STT
-
-Modules :
+# Pipeline complet
 
 ```text
-VoiceManager
-MicrophoneManager
+Utilisateur
+↓
+"Kiro, chanson suivante"
+↓
+Wake Word
+↓
+Speech To Text
+↓
+Texte
+↓
+LLM
+↓
+Intention
+↓
+MCP Router
+↓
+Tool
+↓
+Exécution
 ```
 
 ---
@@ -75,43 +165,68 @@ MicrophoneManager
 
 Responsabilité :
 
-Détection du mot-clé :
+Détecter l'appel de Kiro.
+
+Exemple :
 
 ```text
-Kiro
-```
-
-Modules :
-
-```text
-WakeWordService
-WakeWordEngine
+Kiro, chanson suivante.
 ```
 
 ---
 
-# Couche STT
+## Modes
+
+### Mode désactivé
+
+Kiro écoute uniquement lorsque l'application est ouverte.
+
+### Mode activé
+
+Kiro écoute même :
+
+```text
+Écran verrouillé
+Écran éteint
+Téléphone dans la poche
+```
+
+Cette option doit être configurable par l'utilisateur.
+
+---
+
+# Couche Speech To Text
 
 Responsabilité :
 
-Convertir :
+Convertir la voix en texte.
+
+Exemple :
 
 ```text
-Voix → Texte
+"Kiro, ouvre Spotify."
 ```
 
-Interface :
+↓
+
+```text
+ouvre spotify
+```
+
+---
+
+## Interface
 
 ```kotlin
 interface SpeechToTextEngine
 ```
 
-Implémentations futures :
+---
+
+## Implémentation prévue
 
 ```text
 Whisper
-Gemini Nano
-Autres
 ```
 
 ---
@@ -120,23 +235,29 @@ Autres
 
 Responsabilité :
 
-Comprendre l'intention utilisateur.
+Comprendre la commande utilisateur.
 
-Ne doit jamais :
+Le LLM :
 
-- accéder au système
-- contrôler Android
-- gérer des permissions
+✅ comprend
 
-Rôle unique :
+✅ interprète
 
-```text
-Comprendre
-Décider
-Répondre
-```
+✅ répond
 
-Interface :
+Le LLM :
+
+❌ n'accède pas au système
+
+❌ ne contrôle pas Android
+
+❌ ne choisit pas ses permissions
+
+❌ n'exécute aucune action
+
+---
+
+## Interface
 
 ```kotlin
 interface LLMEngine
@@ -146,27 +267,35 @@ interface LLMEngine
 
 # Couche MCP
 
-Responsabilité :
+MCP est le point d'entrée unique pour toutes les actions.
 
-Point d'entrée unique des actions.
-
-Toutes les demandes du modèle doivent passer ici.
+Aucune action système ne peut contourner cette couche.
 
 ---
 
 # MCP Router
 
-Responsable de :
+Responsabilités :
 
 ```text
 Validation
 Permissions
 Dispatch
-Logs
-Exécution
+Execution
+Logging
 ```
 
-Exemple :
+---
+
+## Exemple
+
+Commande :
+
+```text
+"Kiro, chanson suivante."
+```
+
+Résultat LLM :
 
 ```json
 {
@@ -175,21 +304,33 @@ Exemple :
 }
 ```
 
+Le routeur :
+
+```text
+Valide
+↓
+Vérifie les permissions
+↓
+Exécute
+↓
+Journalise
+```
+
 ---
 
 # Cycle MCP
 
 ```text
 LLM
- ↓
+↓
 MCP Request
- ↓
+↓
 Validation
- ↓
+↓
 Permission Check
- ↓
+↓
 Tool Execution
- ↓
+↓
 Response
 ```
 
@@ -201,9 +342,9 @@ Response
 mcp/
 │
 ├── router/
+├── request/
 ├── validation/
 ├── permissions/
-├── request/
 └── response/
 ```
 
@@ -211,7 +352,11 @@ mcp/
 
 # Tool System
 
-Chaque outil doit implémenter :
+Chaque fonctionnalité est un outil.
+
+---
+
+## Interface
 
 ```kotlin
 interface Tool {
@@ -221,164 +366,244 @@ interface Tool {
 
 ---
 
-# Spotify Tool
+# V1 - Outils autorisés
 
-Responsabilités :
+## Spotify
 
-```text
-Play
-Pause
-Next
-Previous
-Volume
-```
-
-Classe :
-
-```kotlin
-SpotifyTool
-```
-
----
-
-# Notification Tool
-
-Responsabilités :
-
-```text
-Lire
-Résumer
-Lister
-```
-
-Classe :
-
-```kotlin
-NotificationTool
-```
-
----
-
-# System Tool
-
-Responsabilités :
-
-```text
-Heure
-Date
-Batterie
-Réseau
-```
-
-Classe :
-
-```kotlin
-SystemTool
-```
-
----
-
-# App Tool
-
-Responsabilités :
-
-```text
-Ouvrir application
-```
-
-Classe :
-
-```kotlin
-AppTool
-```
-
----
-
-# Permissions Engine
-
-But :
-
-Limiter les actions autorisées.
-
-Niveaux :
-
----
-
-## Niveau 1
-
-Exécution immédiate.
+Actions :
 
 ```text
 play
 pause
+next_song
+previous_song
+volume_up
+volume_down
+```
+
+---
+
+## Notifications
+
+Actions :
+
+```text
+get_notifications
+who_just_messaged_me
+notification_count
+```
+
+---
+
+## Système
+
+Actions :
+
+```text
 battery_status
-time
+current_time
+current_date
 ```
 
 ---
 
-## Niveau 2
+## Applications
 
-Confirmation requise.
+Actions :
 
 ```text
-call_contact
-send_sms
-share_location
+open_app
 ```
 
 ---
 
-## Niveau 3
+# Vision long terme
 
-Bloqué.
+L'architecture doit permettre plus tard :
 
 ```text
-factory_reset
-delete_files
-install_apk
+Spotify
+YouTube Music
+Discord
+Maps
+Navigation
+Autres applications
+```
+
+sans modifier MCP.
+
+---
+
+# Gestion des notifications
+
+Version 1 :
+
+Kiro utilise uniquement les notifications Android actuellement visibles.
+
+Exemple :
+
+```text
+WhatsApp - Jean
+Discord - Marc
+```
+
+Commande :
+
+```text
+Kiro, qui vient de m'écrire ?
+```
+
+Réponse :
+
+```text
+Jean et Marc viennent de t'écrire.
 ```
 
 ---
 
-# Mémoire
+## Pas de lecture directe
 
-Responsabilité :
-
-Stockage local.
-
-Catégories :
+Version 1 ne doit pas :
 
 ```text
-Préférences
-Historique
-Mémoire utilisateur
+Explorer Gmail
+Explorer Discord
+Explorer Messenger
+Explorer WhatsApp
+```
+
+en dehors des notifications exposées par Android.
+
+---
+
+# Réponses utilisateur
+
+## Action simple
+
+Commande :
+
+```text
+Kiro, chanson suivante.
+```
+
+Réponse :
+
+```text
+Aucune réponse vocale.
+```
+
+Le changement de chanson constitue déjà la confirmation.
+
+---
+
+## Question
+
+Commande :
+
+```text
+Kiro, qui vient de m'écrire ?
+```
+
+Réponse :
+
+```text
+Jean vient de t'envoyer un message.
+Veux-tu que je te le lise ?
+```
+
+---
+
+## Erreur
+
+Commande :
+
+```text
+Kiro, supprime mes photos.
+```
+
+Réponse :
+
+```text
+Je ne possède pas cette capacité.
+```
+
+---
+
+# Personnalité
+
+Kiro doit être :
+
+```text
+Professionnel
+Naturel
+Serviable
+Discret
+```
+
+Kiro peut proposer un suivi utile.
+
+Exemple :
+
+```text
+Tu as reçu un message de Jean.
+Veux-tu que je te le lise ?
+```
+
+Kiro ne doit pas :
+
+```text
+Parler inutilement
+Interrompre l'utilisateur
+Agir comme un compagnon virtuel
+```
+
+---
+
+# Historique
+
+Aucun historique conversationnel.
+
+---
+
+## Historique conservé
+
+Logs techniques uniquement.
+
+Exemple :
+
+```text
+20:04:12
+Command: next_song
+Tool: Spotify
+Result: Success
+Duration: 32ms
+```
+
+---
+
+## Historique refusé
+
+```text
+Utilisateur : Qui m'a écrit ?
+
+Kiro : Jean et Marc t'ont écrit aujourd'hui.
 ```
 
 ---
 
 # Logging
 
-Toutes les actions doivent produire un log.
+Toutes les actions MCP doivent être journalisées.
 
 Structure :
 
 ```text
 Timestamp
-Module
 Commande
+Tool
+Action
 Résultat
 Durée
-```
-
-Exemple :
-
-```text
-20:01:54
-SpotifyTool
-next_song
-success
-45ms
 ```
 
 ---
@@ -389,82 +614,52 @@ Architecture globale :
 
 ```text
 UI
- ↓
+↓
 ViewModel
- ↓
+↓
 Repository
- ↓
+↓
 Service
- ↓
-Tool / Engine
+↓
+Tool
 ```
 
 ---
 
-# Organisation du code
+# Organisation du projet
 
 ```text
 app/src/main/java/com/remi/kiro/
 
 ├── core/
 ├── ui/
-├── voice/
 ├── wakeword/
+├── speech/
 ├── llm/
 ├── mcp/
+├── permissions/
 ├── tools/
 │   ├── spotify/
 │   ├── notifications/
 │   ├── system/
 │   └── apps/
-├── memory/
-├── settings/
-└── logs/
+├── logs/
+└── settings/
 ```
 
 ---
 
-# V1
+# Sécurité
 
-Modules obligatoires :
+Principe fondamental :
 
-- Dashboard
-- Wake Word
-- STT
-- MCP Router
-- Spotify Tool
-- Logging
+```text
+Le LLM n'a aucun pouvoir.
+```
 
----
+Le LLM produit une intention.
 
-# V2
-
-Modules optionnels :
-
-- Notifications
-- Mémoire persistante
-- Personnalité configurable
-
----
-
-# V3
-
-Modules avancés :
-
-- Vision
-- Automatisation
-- Routines
-- Plugins MCP utilisateur
-
----
-
-# Règle fondamentale
-
-Le LLM n'a aucun accès au système.
-
-Le LLM produit uniquement une intention.
-
-Le routeur MCP décide.
+Le MCP Router décide.
 
 Le Tool exécute.
 
