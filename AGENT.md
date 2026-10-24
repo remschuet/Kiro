@@ -1,1064 +1,670 @@
-\# AGENT.md
+# AGENT.md
 
-
-
-\# KIRO
-
-
+# KIRO
 
 Assistant IA vocal local pour Android.
 
+---
 
+# Mission
 
-\---
+Kiro est un assistant vocal personnel fonctionnant entièrement sur l'appareil.
 
+Le projet a pour objectif de fournir une expérience semblable à un assistant moderne tout en respectant les principes suivants :
 
+- 100 % Kotlin
+- 100 % local
+- Offline First
+- Privacy First
+- Aucune dépendance aux services cloud
+- Contrôle total de l'utilisateur
+- Architecture MCP obligatoire
 
-\# Vision du projet
+---
 
+# Règle absolue
 
+Le LLM ne possède aucun pouvoir.
 
-Kiro est un assistant IA personnel fonctionnant entièrement sur Android.
+Le LLM :
 
+- comprend
+- interprète
+- répond
 
+Le LLM ne :
 
-Objectifs :
+- contrôle pas Android
+- ne possède aucune permission
+- n'exécute aucune action
+- ne choisit pas ses capacités
 
+Toutes les actions passent obligatoirement par MCP.
 
+---
 
-\- 100 % Kotlin
+# Principes fondamentaux
 
-\- Fonctionnement local prioritaire
+## Local First
 
-\- Aucun cloud requis
+Toutes les données restent localement sur l'appareil.
 
-\- Respect de la vie privée
+Cela inclut :
 
-\- Architecture MCP sécurisée
+- voix
+- texte
+- historique
+- notifications
+- mémoire
+- logs
 
-\- Interface minimaliste et futuriste
+Aucune donnée utilisateur ne doit être envoyée vers un serveur externe.
 
-\- Optimisé pour Pixel mais compatible Android moderne
+---
 
+## Offline First
 
-
-Kiro ne doit jamais avoir un accès illimité au système.
-
-
-
-Le modèle IA ne possède aucun pouvoir direct.
-
-
-
-Toutes les actions transitent par un routeur MCP contrôlé par l'application.
-
-
-
-\---
-
-
-
-\# Philosophie produit
-
-
-
-Le projet doit donner l'impression :
-
-
-
-\- d'un système d'exploitation intelligent
-
-\- d'une IA calme
-
-\- d'une technologie discrète
-
-\- d'un produit haut de gamme
-
-
-
-Inspirations :
-
-
-
-\- Nothing OS
-
-\- Rivian UI
-
-\- Tesla UI
-
-\- Interstellar
-
-\- Iron Man (Jarvis)
-
-\- Android Material 3
-
-
-
-Ne pas copier directement ces interfaces.
-
-
-
-\---
-
-
-
-\# Principes techniques
-
-
-
-\## Langage
-
-
-
-Kotlin uniquement.
-
-
-
-Pas de Python.
-
-
-
-Pas de NodeJS.
-
-
-
-Pas de backend externe obligatoire.
-
-
-
-\---
-
-
-
-\## Architecture
-
-
-
-Architecture modulaire.
-
-
-
-Chaque fonctionnalité doit être isolée.
-
-
+Kiro doit rester fonctionnel sans connexion Internet.
 
 Exemple :
 
-
-
 ```text
-
-core
-
-voice
-
-wakeword
-
-notification
-
-spotify
-
-llm
-
-memory
-
-mcp
-
-ui
-
-```
-
-
-
-\---
-
-
-
-\# Structure recommandée
-
-
-
-```text
-
-app/
-
-│
-
-├── core/
-
-│
-
-├── voice/
-
-│
-
-├── wakeword/
-
-│
-
-├── llm/
-
-│
-
-├── mcp/
-
-│
-
-├── memory/
-
-│
-
-├── notification/
-
-│
-
-├── spotify/
-
-│
-
-├── permissions/
-
-│
-
-├── settings/
-
-│
-
-└── ui/
-
-```
-
-
-
-\---
-
-
-
-\# Design System
-
-
-
-\## Thème général
-
-
-
-Futuriste.
-
-
-
-Minimaliste.
-
-
-
-Sobre.
-
-
-
-Aucune surcharge visuelle.
-
-
-
-\---
-
-
-
-\## Couleurs
-
-
-
-Fond principal :
-
-
-
-```text
-
-\#090909
-
-```
-
-
-
-Fond secondaire :
-
-
-
-```text
-
-\#121212
-
-```
-
-
-
-Fond cartes :
-
-
-
-```text
-
-\#1A1A1A
-
-```
-
-
-
-Accent principal :
-
-
-
-```text
-
-\#00E5FF
-
-```
-
-
-
-Accent secondaire :
-
-
-
-```text
-
-\#64FFDA
-
-```
-
-
-
-Texte :
-
-
-
-```text
-
-\#FFFFFF
-
-```
-
-
-
-Texte secondaire :
-
-
-
-```text
-
-\#B0BEC5
-
-```
-
-
-
-Erreur :
-
-
-
-```text
-
-\#FF5252
-
-```
-
-
-
-\---
-
-
-
-\## Style
-
-
-
-Préférer :
-
-
-
-\- beaucoup d'espace
-
-\- peu de texte
-
-\- cartes simples
-
-\- animations douces
-
-\- transparence légère
-
-
-
-Éviter :
-
-
-
-\- couleurs agressives
-
-\- effets flashy
-
-\- gradients excessifs
-
-\- interfaces denses
-
-
-
-\---
-
-
-
-\# Interface utilisateur
-
-
-
-L'application doit sembler légère.
-
-
-
-Maximum 5 écrans principaux.
-
-
-
-\---
-
-
-
-\## Dashboard
-
-
-
-Écran principal.
-
-
-
-Contient :
-
-
-
-\- État de Kiro
-
-\- Écoute active
-
-\- Batterie
-
-\- Dernière commande
-
-\- Raccourcis rapides
-
-
-
-\---
-
-
-
-\## Historique
-
-
-
-Liste des interactions.
-
-
-
-Format :
-
-
-
-```text
-
-Utilisateur
-
+Mode avion activé
 ↓
-
-Réponse IA
-
-↓
-
-Action réalisée
-
+Kiro fonctionne toujours
 ```
 
+Certaines commandes dépendront naturellement d'Internet.
 
-
-\---
-
-
-
-\## Outils
-
-
-
-Liste des outils MCP disponibles.
-
-
-
-Exemples :
-
-
+Exemple :
 
 ```text
-
 Spotify
-
-Notifications
-
-Batterie
-
-Applications
-
+Météo
+Recherche web
 ```
 
+Mais l'assistant lui-même doit continuer de fonctionner.
 
+---
 
-\---
+## Contrôle utilisateur
 
+L'utilisateur garde toujours le contrôle.
 
+Kiro ne doit jamais :
 
-\## Mémoire
+- prendre une initiative
+- agir seul
+- lancer une routine
+- automatiser une action
 
+Toutes les interactions commencent par l'utilisateur.
 
+---
 
-Affichage de ce que Kiro retient.
+# Personnalité
 
+Kiro doit être :
 
+- professionnel
+- naturel
+- agréable
+- utile
+- discret
 
-L'utilisateur doit pouvoir :
+Kiro ne doit pas être :
 
+- bavard
+- envahissant
+- émotionnel
+- exagérément robotique
 
+---
 
-\- consulter
+## Exemple de réponse
 
-\- modifier
-
-\- supprimer
-
-
-
-\---
-
-
-
-\## Paramètres
-
-
-
-Configuration complète.
-
-
-
-\---
-
-
-
-\# UX
-
-
-
-L'application doit toujours inspirer :
-
-
+Question :
 
 ```text
-
-Confiance
-
-Simplicité
-
-Fluidité
-
-Contrôle
-
+Kiro, qui vient de m'écrire ?
 ```
 
-
-
-\---
-
-
-
-\# Animations
-
-
-
-Animations courtes.
-
-
-
-Durée cible :
-
-
+Réponse :
 
 ```text
-
-150ms à 300ms
-
+Jean vient de t'écrire.
+Veux-tu que je te lise son message ?
 ```
 
+---
 
-
-Jamais plus de :
-
-
+## Exemple interdit
 
 ```text
+Salut ! 😊
 
-500ms
-
+J'espère que tu passes une excellente journée !
 ```
 
+---
 
+# Mode d'interaction
 
-\---
+## Format
 
-
-
-\# IA
-
-
-
-L'IA ne doit jamais :
-
-
-
-\- exécuter directement du code
-
-\- accéder directement au système
-
-\- modifier des permissions
-
-\- installer des applications
-
-
-
-\---
-
-
-
-\# Architecture MCP
-
-
-
-Toutes les actions transitent par :
-
-
+Toujours :
 
 ```text
+Kiro + commande
+```
 
+Exemple :
+
+```text
+Kiro, ouvre Spotify
+```
+
+```text
+Kiro, qui vient de m'écrire ?
+```
+
+```text
+Kiro, chanson suivante
+```
+
+---
+
+## Pas de conversation continue
+
+Kiro ne reste pas en écoute après une commande.
+
+Exemple :
+
+```text
+Kiro, chanson suivante
+```
+
+↓
+
+Exécution
+
+↓
+
+Fin
+
+---
+
+Pas de :
+
+```text
+Oui ?
+```
+
+```text
+J'écoute.
+```
+
+```text
+Que puis-je faire pour toi ?
+```
+
+---
+
+# Réponses
+
+## Actions simples
+
+Si une action est visible immédiatement :
+
+```text
+Kiro, chanson suivante
+```
+
+↓
+
+Aucune réponse vocale.
+
+Le changement de chanson est la confirmation.
+
+---
+
+## Questions
+
+Si une réponse est nécessaire :
+
+```text
+Kiro, quelle heure est-il ?
+```
+
+↓
+
+Réponse vocale.
+
+---
+
+## Erreurs
+
+Exemple :
+
+```text
+Kiro, supprime mes photos.
+```
+
+↓
+
+```text
+Je ne possède pas cette capacité.
+```
+
+---
+
+# Wake Word
+
+Mot-clé :
+
+```text
+Kiro
+```
+
+---
+
+## Modes supportés
+
+### Mode normal
+
+Wake word désactivé.
+
+Kiro fonctionne uniquement lorsque l'application est ouverte.
+
+---
+
+### Mode écoute permanente
+
+Wake word activé.
+
+Kiro peut être réveillé :
+
+- écran allumé
+- écran verrouillé
+- écran éteint
+
+Cette fonctionnalité doit être configurable dans les paramètres.
+
+---
+
+# Architecture technique
+
+Pipeline principal :
+
+```text
 Utilisateur
-
 ↓
-
-Voice
-
+Wake Word
 ↓
-
+Speech To Text
+↓
 LLM
-
 ↓
-
 MCP Router
-
 ↓
-
 Tool
-
+↓
+Action
 ```
 
+---
 
+# Speech To Text
 
-\---
-
-
-
-\# Exemple
-
-
-
-Utilisateur :
-
-
+Responsabilité :
 
 ```text
-
-Kiro, chanson suivante.
-
+Voix → Texte
 ```
 
-
-
-LLM :
-
-
-
-```json
-
-{
-
-&#x20;   "action":"next\_song"
-
-}
-
-```
-
-
-
-Router :
-
-
+Solution privilégiée :
 
 ```text
+Whisper local
+```
 
+---
+
+# LLM
+
+Responsabilité :
+
+```text
+Compréhension
+Décision
+Réponse naturelle
+```
+
+Préférences :
+
+```text
+Réactivité
+Compréhension
+Exécution fiable
+```
+
+Le modèle doit toujours fonctionner localement.
+
+---
+
+# MCP
+
+Toutes les actions passent par MCP.
+
+Aucune exception.
+
+---
+
+## Cycle MCP
+
+```text
+LLM
+↓
+Intent
+↓
+MCP Router
+↓
 Validation
-
+↓
+Permission Check
+↓
+Tool
+↓
+Execution
 ```
 
+---
 
+# Gestion des outils
 
-Tool :
+Chaque fonctionnalité est implémentée sous forme d'outil.
 
+Les outils définissent les capacités réelles de Kiro.
 
+---
+
+## Exemple
 
 ```text
-
-SpotifyTool.next()
-
+SpotifyTool
 ```
 
-
-
-\---
-
-
-
-\# Outils autorisés V1
-
-
-
-Spotify :
-
-
+Actions :
 
 ```text
-
 play
-
 pause
-
-next
-
-previous
-
-volume
-
+next_song
+previous_song
+volume_up
+volume_down
 ```
 
+---
 
+## Exemple
+
+```text
+NotificationTool
+```
+
+Actions :
+
+```text
+notification_count
+who_just_messaged_me
+notification_summary
+```
+
+---
+
+# Interdiction d'inventer des capacités
+
+Le LLM ne peut jamais créer une nouvelle action.
+
+Si une action ne possède pas :
+
+```text
+Tool
+Handler
+Implementation
+```
+
+alors l'action est refusée.
+
+---
+
+## Exemple
+
+Commande :
+
+```text
+Kiro, root le téléphone.
+```
+
+Réponse :
+
+```text
+Je ne possède pas cette capacité.
+```
+
+---
+
+# Notifications
+
+Version 1 :
+
+Utiliser uniquement les notifications Android actuellement disponibles.
+
+---
+
+## Exemple
 
 Notifications :
 
-
-
 ```text
-
-read\_notifications
-
-notification\_summary
-
+WhatsApp - Jean
+Discord - Marc
 ```
 
-
-
-Système :
-
-
+Commande :
 
 ```text
-
-battery\_status
-
-current\_time
-
-current\_date
-
+Kiro, qui vient de m'écrire ?
 ```
 
-
-
-Applications :
-
-
+Réponse :
 
 ```text
-
-open\_app
-
+Jean et Marc viennent de t'écrire.
 ```
 
+---
 
+## À éviter
 
-\---
-
-
-
-\# Outils interdits
-
-
-
-Toujours refusés :
-
-
+Version 1 ne doit pas :
 
 ```text
-
-factory\_reset
-
-delete\_files
-
-root\_device
-
-install\_apk
-
-adb\_command
-
-grant\_permissions
-
+Explorer Gmail
+Explorer Discord
+Lire des bases de données internes
+Scanner des applications
 ```
 
+---
 
+# Historique
 
-\---
+Kiro ne conserve pas d'historique conversationnel.
 
+---
 
+## Historique autorisé
 
-\# Voice Stack
+Logs techniques uniquement.
 
-
-
-Version cible :
-
-
+Exemple :
 
 ```text
-
-Wake Word
-
-↓
-
-Speech To Text
-
-↓
-
-LLM
-
-↓
-
-Text To Speech
-
+20:04:12
+Command: next_song
+Tool: Spotify
+Result: Success
+Duration: 32ms
 ```
 
+---
 
-
-\---
-
-
-
-\# Performance
-
-
-
-Objectif :
-
-
-
-Temps de réponse inférieur à :
-
-
+## Historique interdit
 
 ```text
+Utilisateur :
+Qui vient de m'écrire ?
 
-2 secondes
-
+Kiro :
+Jean vient de t'écrire.
 ```
 
+---
 
+# Interface utilisateur
 
-pour une commande locale.
+Style recherché :
 
+- minimaliste
+- moderne
+- futuriste
+- épuré
 
+Inspirations :
 
-\---
+- Nothing OS
+- Tesla
+- Rivian
+- Interfaces sci-fi sobres
 
+---
 
+## Éviter
 
-\# Logging
+- gradients agressifs
+- animations excessives
+- surcharge d'informations
+- apparence gamer
 
+---
 
+# Écrans principaux
 
-Toutes les actions MCP doivent être enregistrées.
+## Dashboard
 
+Affiche :
 
+- État de Kiro
+- Wake word actif/inactif
+- État du moteur IA
+- Outils disponibles
 
-Chaque log doit inclure :
+---
 
+## Outils
 
+Affiche :
+
+- Spotify
+- Notifications
+- Applications
+- Outils futurs
+
+---
+
+## Logs
+
+Affiche :
+
+- historique technique
+- erreurs
+- actions exécutées
+
+---
+
+## Paramètres
+
+Affiche :
+
+- mode écoute permanente
+- paramètres audio
+- paramètres IA
+- permissions
+
+---
+
+# Organisation du code
 
 ```text
+app/src/main/java/com/remi/kiro/
 
-Date
-
-Commande
-
-Action
-
-Succès/Échec
-
-Durée
-
+├── core/
+├── ui/
+├── wakeword/
+├── speech/
+├── llm/
+├── mcp/
+├── permissions/
+├── tools/
+│   ├── spotify/
+│   ├── notifications/
+│   ├── system/
+│   └── apps/
+├── logs/
+└── settings/
 ```
 
+---
 
+# Priorités de développement
 
-\---
+## V1
 
+- Dashboard
+- Wake Word
+- Whisper
+- MCP Router
+- Spotify
+- Notifications
+- Logging
 
+---
 
-\# Sécurité
+## V2
 
+- Lectures détaillées des notifications
+- Mémoire locale
+- Nouveaux outils
 
+---
 
-Aucune action critique sans validation utilisateur.
+## V3
 
+- Support davantage d'applications
+- Vision
+- Plugins MCP
 
+---
 
-Toujours privilégier :
+# Principe directeur
 
+Kiro n'est pas un chatbot.
 
+Kiro est un assistant système vocal.
 
-```text
+Le but n'est pas de discuter.
 
-Privacy First
-
-Local First
-
-User First
-
-```
-
-
-
-\---
-
-
-
-\# Qualité du code
-
-
-
-Règles :
-
-
-
-\- fonctions courtes
-
-\- classes uniques
-
-\- architecture claire
-
-\- commentaires uniquement si nécessaire
-
-\- éviter le code dupliqué
-
-
-
-Appliquer :
-
-
-
-```text
-
-SOLID
-
-Clean Architecture
-
-MVVM
-
-```
-
-
-
-\---
-
-
-
-\# Versions
-
-
-
-\## v0.1
-
-
-
-\- Interface
-
-\- Dashboard
-
-\- Wake Word
-
-\- Architecture MCP
-
-
-
-\## v0.2
-
-
-
-\- Spotify
-
-\- Notifications
-
-\- Historique
-
-
-
-\## v0.3
-
-
-
-\- Mémoire locale
-
-
-
-\## v0.4
-
-
-
-\- LLM local
-
-
-
-\## v1.0
-
-
-
-Assistant complet utilisable quotidiennement.
-
-
-
-\---
-
-
-
-\# Règle absolue
-
-
-
-Le modèle IA ne possède aucun pouvoir.
-
-
-
-Le modèle propose.
-
-
-
-Kiro décide.
-
-
-
-L'utilisateur contrôle.
-
+Le but est de comprendre, répondre et exécuter rapidement les actions autorisées par l'utilisateur.
